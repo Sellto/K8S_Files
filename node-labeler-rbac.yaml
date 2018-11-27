@@ -1,0 +1,36 @@
+## Gives the right to the pods inside the node-labeling namespace to labelise the nodes
+## with te cli: kubectl label nodes <node_name> <label>=<value>
+apiVersion: v1
+kind: List
+items:
+  #Create the namespace node-labeling
+  - apiVersion: v1
+    kind: Namespace
+    metadata:
+      name: node-labeling
+  #define the rights
+  - apiVersion: rbac.authorization.k8s.io/v1
+    kind: ClusterRole
+    metadata:
+      name: node-labeler
+    rules:
+      - apiGroups:
+          - ''
+        resources:
+          - nodes
+        verbs:
+          - get
+          - patch
+  #link the ClusterRole to the namespace        
+  - apiVersion: rbac.authorization.k8s.io/v1beta1
+    kind: ClusterRoleBinding
+    metadata:
+      name: node-labeler-rbac
+    subjects:
+      - kind: ServiceAccount
+        name: default
+        namespace: node-labeling
+    roleRef:
+      kind: ClusterRole
+      name: node-labeler
+      apiGroup: rbac.authorization.k8s.io
